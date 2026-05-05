@@ -1,0 +1,127 @@
+{
+  "purpose": "Minimal smoke test for upstream CACTUS/MAPF implementation",
+  "repo": "C:\\my-project\\2. smartfactory\\5\\5\\rl4mapf",
+  "run_dir": "C:\\my-project\\2. smartfactory\\5\\5\\cactus_smoke_output\\quick-run-20260505-162050",
+  "seed": 7,
+  "elapsed_seconds": 0.6082103252410889,
+  "parameters": {
+    "observation_size": 5,
+    "nr_agents": 2,
+    "sample_nr_agents": 2,
+    "hidden_layer_dim": 16,
+    "nr_epochs": 2,
+    "episodes_per_epoch": 1,
+    "epoch_log_interval": 1,
+    "radius_update_interval": 1,
+    "time_limit": 12,
+    "test_init_goal_radius": null,
+    "gamma": 1,
+    "render_mode": false,
+    "makespan_mode": false,
+    "grad_norm_clip": 10,
+    "vdn_mode": false,
+    "reward_sharing": false,
+    "mixing_hidden_size": 64,
+    "algorithm_name": "PPO_QMIX",
+    "curriculum_name": "CACTUS",
+    "directory": "C:\\my-project\\2. smartfactory\\5\\5\\cactus_smoke_output\\quick-run-20260505-162050",
+    "sliding_window_size": 2,
+    "improvement_threshold": 0.75,
+    "deviation_factor": 2,
+    "obstacle_map": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "device": "cpu",
+    "observation_dim": [
+      5,
+      5,
+      5
+    ],
+    "nr_actions": 5,
+    "critic_name": "QMIX",
+    "clip_ratio": 0.1,
+    "update_iterations": 4,
+    "output_dim": 5
+  },
+  "result": {
+    "total_time": 0.38538050651550293,
+    "time_per_epoch": 0.19269025325775146,
+    "success_rate": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "completion_rate": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "auc_completion": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "auc_success": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "training_time": [
+      0.16138410568237305,
+      0.11788797378540039,
+      0.10610842704772949
+    ]
+  },
+  "environment": {
+    "python": "3.12.13 (main, Mar  3 2026, 15:01:35) [MSC v.1944 64 bit (AMD64)]",
+    "torch": "2.11.0+cpu",
+    "numpy": "2.4.4"
+  }
+}

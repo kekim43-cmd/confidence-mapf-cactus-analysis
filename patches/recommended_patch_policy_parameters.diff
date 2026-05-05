@@ -1,0 +1,12 @@
+diff --git a/cactus/controller/a2c_controller.py b/cactus/controller/a2c_controller.py
+index 0000000..0000000 100644
+--- a/cactus/controller/a2c_controller.py
++++ b/cactus/controller/a2c_controller.py
+@@
+-        self.policy_parameters = self.policy_network.parameters()
++        self.policy_parameters = list(self.policy_network.parameters())
+         self.policy_optimizer = torch.optim.Adam(self.policy_parameters, lr=self.learning_rate)
+@@
+-            self.critic_parameters = self.critic_network.parameters()
++            self.critic_parameters = list(self.critic_network.parameters())
+             self.critic_optimizer = torch.optim.Adam(self.critic_parameters, lr=self.learning_rate)
