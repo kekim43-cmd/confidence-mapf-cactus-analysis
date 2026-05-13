@@ -2,6 +2,12 @@
 
 이 저장소는 논문 **Confidence-Based Curriculum Learning for Multi-Agent Path Finding**의 공개 구현체를 로컬에서 실행해 보고, 핵심 구조를 정리한 분석 자료입니다.
 
+## 실행 결과 보고서
+
+교수님이 직접 확인할 수 있도록 실행 명령, 결과값, 결과 화면 캡처, 재실행 방법을 정리했습니다.
+
+- [CACTUS 오픈소스 코드 실행 결과 보고서](REPORT.md)
+
 대상 공개 저장소:
 
 - https://github.com/thomyphan/rl4mapf
@@ -31,4 +37,3 @@ python -m venv .venv
 - torch 2.11.0+cpu
 - numpy 2.4.4
 - pygame 2.6.1
-
