@@ -68,7 +68,7 @@
 
 ![생성 산출물 및 재현 가능성](assets/artifacts_reproducibility.png)
 
-## 5. 교수님이 직접 실행하는 방법
+## 5. 직접 실행하는 방법
 
 Windows PowerShell 기준 실행 방법은 다음과 같다.
 
