@@ -6,6 +6,8 @@
 
 이번 실행은 논문 전체 성능을 재현하는 full training이 아니라, 공개 코드가 다음 경로까지 정상 동작하는지 확인하는 **smoke test**이다.
 
+본 과제는 AI Coding Tools을 이용하여 논문의 "실험" 파트를 구현하는 과제로, 구현 전 과정은 **OpenAI Codex CLI**를 통해 진행하였다. 단계별 구현 과정은 3장, 입력한 프롬프트는 4장과 [PROMPTS.md](PROMPTS.md)에 정리하였다.
+
 ![실행 검증 파이프라인](assets/execution_pipeline.png)
 
 ## 2. 내가 실행한 것
@@ -34,7 +36,91 @@
 | Time limit | 12 |
 | 목적 | 논문 전체 재현이 아닌 최소 실행 경로 검증 |
 
-## 3. 실행 결과 화면
+## 3. 순차적 구현 매뉴얼
+
+AI Coding Tool(OpenAI Codex CLI)을 이용해 실제로 진행한 순서를 단계별로 정리한 것이다. 동일한 순서로 따라 하면 같은 결과를 얻을 수 있다.
+
+### 1단계. 오픈소스 공개 여부 확인
+
+구현에 앞서 논문의 공개 코드가 실제로 존재하고 사용 가능한지 확인하였다.
+
+- 저자 공식 페이지의 `[code]` 링크가 public 저장소 `thomyphan/rl4mapf`로 연결됨
+- Springer 확장 논문의 Code availability에도 같은 저장소가 명시됨
+- 라이선스: 연구·교육 목적 사용 가능 (상업적 사용은 별도 문의 필요)
+- 확인 내용은 `analysis/cactus_open_source_check.md`에 기록
+
+### 2단계. 원본 저장소 클론
+
+```powershell
+git clone https://github.com/thomyphan/rl4mapf.git rl4mapf
+```
+
+### 3단계. 코드 구조 파악
+
+클론한 코드를 분석하여 실행 진입점과 제약을 파악하였다.
+
+| 구성 요소 | 내용 |
+|---|---|
+| `run_training.py` | 논문 실험용 학습 스크립트. 기본값이 5000 epochs × 여러 알고리즘 조합이라 그대로 돌리기엔 장시간 필요 |
+| `eval.py` | 평가 스크립트. 저장소에 포함되지 않은 PRIMAL test map `.npy` 파일을 요구 |
+| `cactus/` | 핵심 모듈 — `algorithms`(PPO_QMIX 등 controller), `env/env_generator`(MAPF 그리드월드 생성), `experiments`(학습 루프) |
+| `requirements.txt` | 원본에 없음 → 코드의 import를 역추적해 의존성 도출 필요 |
+
+### 4단계. 실행 환경 구성
+
+원본에 requirements.txt가 없어 import 역추적으로 의존성(torch, numpy, pygame)을 확인하고, 가상환경을 구성하였다.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+### 5단계. smoke test 스크립트 작성
+
+원본 `run_training.py`는 즉시 재현용으로는 규모가 너무 크기 때문에, **원본 코드를 한 줄도 수정하지 않고** 같은 모듈을 import하여 아주 작은 설정으로 학습 루프를 한 번 통과시키는 `scripts/run_cactus_smoke.py`를 작성하였다.
+
+- `sys.path`에 원본 저장소를 추가하고 `cactus.algorithms`, `cactus.env.env_generator`, `cactus.experiments`를 import
+- 축소 파라미터: PPO_QMIX + CACTUS curriculum, 2 agents, 6×6 map, 2 epochs, time limit 12, hidden dim 16
+- 재현성을 위해 random / numpy / torch seed 고정 (seed=7)
+- 실행 결과를 `run_summary.json`으로 자동 저장
+
+### 6단계. 실행 및 결과 확인
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\run_cactus_smoke.py
+```
+
+실행 결과 `cactus_smoke_output/quick-run-20260505-162050/` 아래에 `results.json`, `run_summary.json`, 가중치 3종이 생성됨을 확인하였다 (상세 결과는 5장).
+
+### 7단계. 소스 분석 및 발견점 정리
+
+- 소스 구조·알고리즘 구현 분석: `analysis/cactus_source_analysis_report.md`
+- 실행 중 발견한 gradient clipping 경고에 대한 권장 패치: `patches/recommended_patch_policy_parameters.diff`
+
+### 8단계. GitHub 업로드
+
+본인 계정에 public 저장소를 생성하고 산출물을 업로드하였다.
+
+- 2026-05-05: 분석·smoke test 일체 업로드 (`Add CACTUS MAPF analysis and smoke test`)
+- 2026-05-13: 실행 결과 화면 캡처와 본 보고서 추가 (`Add execution report with result screenshots`)
+
+## 4. 프롬프트 입력 내용
+
+구현 각 단계는 OpenAI Codex CLI에 아래 프롬프트를 입력하여 진행하였다. 도구의 세션 기록에서 발췌한 원문이며, 전체 로그는 [PROMPTS.md](PROMPTS.md)에 있다.
+
+| 단계 | 입력 프롬프트 (원문) |
+|---|---|
+| 오픈소스 확인 | "Confidence-Based Curriculum Learning for Multi-Agent Path Finding 이 논문이 오픈소스가 있어서 오픈소스 코드 구현 및 분석을 할 수 있다고 했었는데 다시 확인해봐" |
+| 구현 착수 | "한번 해보자" |
+| 구현·분석 지시 | "이 논문의 GitHub에 공개되는 오픈소스를 직접 돌려보고 간단히 분석하시고 소스코드/분석보고서를 만들거야." |
+| GitHub 업로드 | "내 깃허브에다가 해줘" |
+| 공개 전환 | "private 말고 링크있으면 볼 수 있게해" |
+| 결과 보고서 자료 | "실행한 결과 보고서에 넣을 사진이나 내용 만들어봐" |
+| 보고서 작성 | "github 보고서에 넣을 내용을 적을거야. 내가 무엇을 돌렸고, 그 결과값은 어떻게 나오는지, 교수님이 직접 실행해볼 수 있도록 간단한 설명과 내가 실행한 결과 화면을 캡처해서 올려야해" |
+
+클론 → 의존성 구성 → 축소 실행 → 보고서로 이어지는 세부 판단(예: 5000 epochs 전체 학습 대신 smoke test로 범위 축소)은 도구가 제안하고 사용자가 승인하는 방식으로 진행하였다.
+
+## 5. 실행 결과 화면
 
 아래 이미지는 로컬에서 실행한 결과 화면을 보고서용으로 정리한 것이다.
 
@@ -54,7 +140,7 @@
 
 `success_rate`와 `completion_rate`가 0으로 나온 것은 성능 실패를 의미하지 않는다. 이번 실행은 2 agents, 2 epochs의 매우 짧은 smoke run이므로, 학습 성능을 평가하기 위한 실험이 아니다. 이 결과는 공개 코드가 환경 생성, rollout, 학습 update, 결과 저장 단계까지 정상적으로 실행되는지를 확인한 값이다.
 
-## 4. 생성된 산출물
+## 6. 생성된 산출물
 
 실행 후 다음 파일이 생성되는 것을 확인하였다.
 
@@ -68,7 +154,7 @@
 
 ![생성 산출물 및 재현 가능성](assets/artifacts_reproducibility.png)
 
-## 5. 직접 실행하는 방법
+## 7. 직접 실행하는 방법
 
 Windows PowerShell 기준 실행 방법은 다음과 같다.
 
@@ -101,7 +187,7 @@ critic_net.pth
 mixer_net.pth
 ```
 
-## 6. 실행 환경
+## 8. 실행 환경
 
 내가 실행한 환경은 다음과 같다.
 
@@ -112,13 +198,13 @@ mixer_net.pth
 | NumPy | 2.4.4 |
 | pygame | 2.6.1 |
 
-## 7. 주의할 점
+## 9. 주의할 점
 
 원본 저장소의 `run_training.py`는 논문 실험용 장시간 학습 스크립트이다. 기본 설정은 5000 epochs와 여러 알고리즘 조합을 순차 실행하므로, 일반 노트북에서 바로 돌리기에는 시간이 오래 걸린다.
 
 또한 원본 `eval.py`는 PRIMAL test map `.npy` 파일을 요구한다. 이 파일은 원본 GitHub 저장소에 포함되어 있지 않으므로, 논문 평가 결과 전체를 그대로 재현하려면 별도 테스트 맵 자료를 받아 `instances/primal_test_envs`에 배치해야 한다.
 
-## 8. 프로젝트와의 연결
+## 10. 프로젝트와의 연결
 
 이 논문은 스마트팩토리 MCS-RTD 통합 제어 플랫폼의 **AI 경로 최적화 모듈**과 직접적으로 연결된다.
 
@@ -129,9 +215,8 @@ mixer_net.pth
 
 ![프로젝트 적용 관점 요약](assets/project_link_summary.png)
 
-## 9. 결론
+## 11. 결론
 
 이번 실험은 논문 전체 성능 재현이 아니라 공개 구현체의 실행 가능성 검증을 목표로 수행하였다. 최소 설정의 smoke run을 통해 CACTUS curriculum, PPO_QMIX controller, MAPF 환경 rollout, 학습 update, 결과 및 가중치 저장이 정상적으로 이어지는 것을 확인하였다.
 
 따라서 해당 오픈소스는 프로젝트의 AI 경로 최적화 모듈을 설계하고 분석하는 출발점으로 활용 가능하다.
-
